@@ -99,28 +99,14 @@ class SpacemouseNode(Node):
         """Attempt to open the SpaceMouse HID device. Never raises."""
         try:
             if self.device_name:
-                success = pyspacemouse.open(device=self.device_name)
+                self.device = pyspacemouse.open(device=self.device_name)
             else:
-                success = pyspacemouse.open()
-        except TypeError:
-            # Older/newer pyspacemouse releases may not accept `device=`.
-            try:
-                success = pyspacemouse.open()
-            except Exception as e:
-                self.get_logger().error(
-                    f'Failed to open SpaceMouse device: {e}', throttle_duration_sec=5.0
-                )
-                success = False
+                self.device = pyspacemouse.open()
+            self.get_logger().info('SpaceMouse device connected')
         except Exception as e:
             self.get_logger().error(
                 f'Failed to open SpaceMouse device: {e}', throttle_duration_sec=5.0
             )
-            success = False
-
-        if success:
-            self.device = success
-            self.get_logger().info('SpaceMouse device connected')
-        else:
             self.device = None
 
     def _reconnect_if_needed(self):
@@ -147,9 +133,6 @@ class SpacemouseNode(Node):
                 f'Error reading SpaceMouse state: {e}', throttle_duration_sec=5.0
             )
             self.device = None
-            return
-
-        if state is None:
             return
 
         raw = {

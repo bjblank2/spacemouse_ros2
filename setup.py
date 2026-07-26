@@ -17,7 +17,7 @@ setup(
         (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
         (os.path.join('share', package_name, 'udev'), glob('udev/*.rules')),
     ],
-    install_requires=['setuptools', 'pyspacemouse', 'hidapi'],
+    install_requires=['setuptools', 'pyspacemouse>=2.0'],
     zip_safe=True,
     maintainer='ros',
     maintainer_email='brianjblank7@gmail.com',
