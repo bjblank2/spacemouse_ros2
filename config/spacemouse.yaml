@@ -1,0 +1,30 @@
+spacemouse_node:
+  ros__parameters:
+    # Leave empty to auto-detect the first supported 3Dconnexion device.
+    device_name: ""
+
+    publish_rate: 100.0
+    frame_id: "spacemouse"
+
+    # Independently toggle each output topic.
+    publish_joy: true
+    publish_twist: true
+
+    # Values below this magnitude (post axis-map, pre-scale) are zeroed.
+    deadzone: 0.05
+
+    # Applied only to the TwistStamped output (Joy publishes raw -1..1 axes).
+    linear_scale: 1.0
+    angular_scale: 1.0
+
+    # Remap and/or invert each output axis. `source` selects which raw
+    # SpaceMouse axis (x, y, z, roll, pitch, yaw) feeds this output axis;
+    # `invert: true` flips its sign. Edit these to match how your SpaceMouse
+    # is mounted/oriented without touching any code.
+    axis_map:
+      x:     {source: "x",     invert: false}
+      y:     {source: "y",     invert: false}
+      z:     {source: "z",     invert: false}
+      roll:  {source: "roll",  invert: false}
+      pitch: {source: "pitch", invert: false}
+      yaw:   {source: "yaw",   invert: false}

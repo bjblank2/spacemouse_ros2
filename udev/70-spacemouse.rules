@@ -1,0 +1,11 @@
+# Grant the `plugdev` group read/write access to 3Dconnexion HID devices
+# (idVendor 256f covers the SpaceMouse Compact and other 3Dconnexion models),
+# so spacemouse_node can open the device as a non-root user.
+#
+# Install with:
+#   sudo cp 70-spacemouse.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+# Then ensure your user is in the `plugdev` group (log out/in to pick it up).
+
+SUBSYSTEM=="usb", ATTR{idVendor}=="256f", MODE="0666", GROUP="plugdev"
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="256f", MODE="0666", GROUP="plugdev"
