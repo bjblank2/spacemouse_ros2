@@ -17,6 +17,15 @@ from sensor_msgs.msg import Joy
 
 AXIS_NAMES = ('x', 'y', 'z', 'roll', 'pitch', 'yaw')
 
+# The device reports translation and rotation as separate HID packets, and
+# each read() call drains only one packet from the kernel's HID queue. Under
+# continuous motion, reading once per tick can't keep up with both packet
+# streams, so the queue backs up and playback lags further behind the
+# physical device the longer you move it. Draining the queue every tick
+# (bounded here as a safety cap against a runaway/flooding device) keeps the
+# published state current instead of trailing behind.
+MAX_READS_PER_TICK = 32
+
 
 class SpacemouseNode(Node):
     """Publishes SpaceMouse Compact input as Joy and/or TwistStamped messages."""
@@ -126,7 +135,13 @@ class SpacemouseNode(Node):
             return
 
         try:
-            state = pyspacemouse.read()
+            state = self.device.read()
+            last_t = state.t
+            for _ in range(MAX_READS_PER_TICK - 1):
+                state = self.device.read()
+                if state.t == last_t:
+                    break
+                last_t = state.t
         except Exception as e:
             self.get_logger().error(
                 f'Error reading SpaceMouse state: {e}', throttle_duration_sec=5.0
@@ -182,7 +197,7 @@ class SpacemouseNode(Node):
     def destroy_node(self):
         if self.device is not None:
             try:
-                pyspacemouse.close()
+                self.device.close()
             except Exception:
                 pass
         super().destroy_node()
