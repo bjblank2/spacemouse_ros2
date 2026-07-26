@@ -15,6 +15,15 @@ Launched via `spacemouse_ros2.launch.py`, the node runs under the `spacemouse` n
 
 Both topics can be independently enabled/disabled via `publish_joy` / `publish_twist`. This matches the `/spacemouse/joy` remap target already used by `lekiwi_ros2` and `lerre_ros2`'s direct-servo launch files (`wheel_control_mode:=joy`).
 
+To run multiple robots/namespaces on the same ROS graph, prepend a prefix with the `namespace_prefix` launch argument instead of the default `/spacemouse/...`:
+
+```bash
+ros2 launch spacemouse_ros2 spacemouse_ros2.launch.py namespace_prefix:=robot1
+# -> /robot1/spacemouse/joy, /robot1/spacemouse/twist_stamped
+```
+
+Leave it unset (the default) for the plain `/spacemouse/...` topics.
+
 ## Configuration
 
 Edit `config/spacemouse.yaml` (or pass your own via the `config_file` launch argument):
