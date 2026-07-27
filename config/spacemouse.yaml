@@ -8,12 +8,13 @@ spacemouse_node:
 
     # Independently toggle each output topic.
     publish_joy: true
-    publish_twist: true
+    publish_twiststamped: true
+    publish_twist: false
 
     # Values below this magnitude (post axis-map, pre-scale) are zeroed.
     deadzone: 0.05
 
-    # Applied only to the TwistStamped output (Joy publishes raw -1..1 axes).
+    # Applied only to the TwistStamped/Twist outputs (Joy publishes raw -1..1 axes).
     linear_scale: 1.0
     angular_scale: 1.0
 

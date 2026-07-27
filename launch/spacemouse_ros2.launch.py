@@ -27,7 +27,7 @@ def generate_launch_description():
         ),
 
         # Namespaced under '[namespace_prefix/]spacemouse' so relative topics
-        # resolve to /spacemouse/joy and /spacemouse/twist_stamped by default
+        # resolve to /spacemouse/joy and /spacemouse/twiststamped by default
         # (matching the remap target already used by lekiwi_ros2/lerre_ros2's
         # direct-servo launch files in wheel_control_mode:=joy), or
         # /<namespace_prefix>/spacemouse/... when a prefix is supplied.

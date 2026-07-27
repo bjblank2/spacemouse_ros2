@@ -4,12 +4,12 @@
 ROS 2 driver node for the 3Dconnexion SpaceMouse Compact.
 
 Reads raw axis/button state via pyspacemouse and publishes it as
-sensor_msgs/Joy and/or geometry_msgs/TwistStamped, with axis source
-selection and inversion driven entirely by ROS parameters (see
-config/spacemouse.yaml).
+sensor_msgs/Joy, geometry_msgs/TwistStamped, and/or geometry_msgs/Twist,
+with axis source selection and inversion driven entirely by ROS parameters
+(see config/spacemouse.yaml).
 """
 
-from geometry_msgs.msg import TwistStamped
+from geometry_msgs.msg import Twist, TwistStamped
 import pyspacemouse
 import rclpy
 from rclpy.node import Node
@@ -28,7 +28,7 @@ MAX_READS_PER_TICK = 32
 
 
 class SpacemouseNode(Node):
-    """Publishes SpaceMouse Compact input as Joy and/or TwistStamped messages."""
+    """Publishes SpaceMouse Compact input as Joy, TwistStamped, and/or Twist messages."""
 
     def __init__(self):
         super().__init__(
@@ -42,6 +42,7 @@ class SpacemouseNode(Node):
         self.publish_rate = float(self.get_parameter('publish_rate').value)
         self.frame_id = self.get_parameter('frame_id').get_parameter_value().string_value
         self.publish_joy = bool(self.get_parameter('publish_joy').value)
+        self.publish_twiststamped = bool(self.get_parameter('publish_twiststamped').value)
         self.publish_twist = bool(self.get_parameter('publish_twist').value)
         self.deadzone = float(self.get_parameter('deadzone').value)
         self.linear_scale = float(self.get_parameter('linear_scale').value)
@@ -58,9 +59,13 @@ class SpacemouseNode(Node):
         if self.publish_joy:
             self.joy_pub = self.create_publisher(Joy, 'joy', 10)
 
+        self.twiststamped_pub = None
+        if self.publish_twiststamped:
+            self.twiststamped_pub = self.create_publisher(TwistStamped, 'twiststamped', 10)
+
         self.twist_pub = None
         if self.publish_twist:
-            self.twist_pub = self.create_publisher(TwistStamped, 'twist_stamped', 10)
+            self.twist_pub = self.create_publisher(Twist, 'twist', 10)
 
         self.device = None
         self._connect()
@@ -71,7 +76,8 @@ class SpacemouseNode(Node):
 
         self.get_logger().info('SpaceMouse node initialized')
         self.get_logger().info(
-            f'  publish_joy={self.publish_joy} publish_twist={self.publish_twist}'
+            f'  publish_joy={self.publish_joy} publish_twiststamped={self.publish_twiststamped} '
+            f'publish_twist={self.publish_twist}'
         )
         self.get_logger().info(f'  axis_map={self.axis_map}')
 
@@ -82,7 +88,8 @@ class SpacemouseNode(Node):
             'publish_rate': 100.0,
             'frame_id': 'spacemouse',
             'publish_joy': True,
-            'publish_twist': True,
+            'publish_twiststamped': True,
+            'publish_twist': False,
             'deadzone': 0.05,
             'linear_scale': 1.0,
             'angular_scale': 1.0,
@@ -165,7 +172,7 @@ class SpacemouseNode(Node):
             joy_msg.buttons = buttons
             self.joy_pub.publish(joy_msg)
 
-        if self.twist_pub is not None:
+        if self.twiststamped_pub is not None:
             twist_msg = TwistStamped()
             twist_msg.header.stamp = stamp
             twist_msg.header.frame_id = self.frame_id
@@ -175,7 +182,17 @@ class SpacemouseNode(Node):
             twist_msg.twist.angular.x = out['roll'] * self.angular_scale
             twist_msg.twist.angular.y = out['pitch'] * self.angular_scale
             twist_msg.twist.angular.z = out['yaw'] * self.angular_scale
-            self.twist_pub.publish(twist_msg)
+            self.twiststamped_pub.publish(twist_msg)
+
+        if self.twist_pub is not None:
+            twist = Twist()
+            twist.linear.x = out['x'] * self.linear_scale
+            twist.linear.y = out['y'] * self.linear_scale
+            twist.linear.z = out['z'] * self.linear_scale
+            twist.angular.x = out['roll'] * self.angular_scale
+            twist.angular.y = out['pitch'] * self.angular_scale
+            twist.angular.z = out['yaw'] * self.angular_scale
+            self.twist_pub.publish(twist)
 
     def destroy_node(self):
         if self.device is not None:
