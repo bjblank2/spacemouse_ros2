@@ -1,4 +1,8 @@
-spacemouse_node:
+# Wildcard node key: the launch file puts this node under a "spacemouse"
+# namespace (optionally prefixed further via namespace_prefix), so its fully
+# qualified name is never just "spacemouse_node" and a literal key here
+# would silently fail to match, leaving the node on its hardcoded defaults.
+/**:
   ros__parameters:
     # Leave empty to auto-detect the first supported 3Dconnexion device.
     device_name: ""
@@ -9,7 +13,7 @@ spacemouse_node:
     # Independently toggle each output topic.
     publish_joy: true
     publish_twiststamped: true
-    publish_twist: false
+    publish_twist: true
 
     # Values below this magnitude (post axis-map, pre-scale) are zeroed.
     deadzone: 0.05
