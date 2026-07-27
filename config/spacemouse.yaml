@@ -27,9 +27,9 @@
     # `invert: true` flips its sign. Edit these to match how your SpaceMouse
     # is mounted/oriented without touching any code.
     axis_map:
-      x:     {source: "x",     invert: false}
-      y:     {source: "y",     invert: false}
+      x:     {source: "y",     invert: true}
+      y:     {source: "x",     invert: true}
       z:     {source: "z",     invert: false}
       roll:  {source: "roll",  invert: false}
       pitch: {source: "pitch", invert: false}
-      yaw:   {source: "yaw",   invert: false}
+      yaw:   {source: "yaw",   invert: true}
